@@ -28,7 +28,7 @@ jobs:
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" || true
 
-      - name: Install Capacitor 6 - STABLE, NO DUPLICATE ERROR
+      - name: Install Capacitor 6 - STABLE
         run: |
           npm init -y
           npm install @capacitor/core@6.2.2 @capacitor/cli@6.2.2 @capacitor/android@6.2.2
@@ -38,16 +38,21 @@ jobs:
           rm -rf android www
           rm -f capacitor.config.ts capacitor.config.json
           mkdir -p www
-          cp index.html manifest.json service-worker.js reciters.json www/
+          cp index.html manifest.json service-worker.js reciters.json www/ || cp index.html www/
           npx cap init "Quran Studio" com.quranstudio.luganda --web-dir=www
           npx cap add android
           npx cap sync android
 
-      - name: Build APK
+      - name: Build APK - WITH RETRY FOR 429 ERROR
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          for i in 1 2 3; do
+            echo "=== Attempt $i / 3 ==="
+            ./gradlew assembleDebug --stacktrace --console=plain && break
+            echo "Build failed, waiting 60s before retry..."
+            sleep 60
+          done
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
