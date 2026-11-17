@@ -23,10 +23,8 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Accept Android Licenses + Setup SDK
+      - name: Accept Android Licenses
         run: |
-          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> $GITHUB_ENV
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" || true
 
@@ -35,16 +33,24 @@ jobs:
           npm init -y
           npm install @capacitor/core @capacitor/cli @capacitor/android
 
-      - name: Init Capacitor App
+      - name: Init Capacitor App - FIXED
         run: |
-          npx cap init "Quran Studio" com.quranstudio.luganda --web-dir=. --npm-client=npm || true
-          npx cap add android || true
+          rm -rf android
+          rm -f capacitor.config.ts capacitor.config.json
+          npx cap init "Quran Studio" com.quranstudio.luganda --web-dir=. --npm-client=npm
+          npx cap add android
+          echo "=== CHECK ANDROID FOLDER ==="
+          ls -la
+          ls -la android/
+          ls -la android/app/ || true
           mkdir -p android/app/src/main/assets/public
           cp index.html manifest.json service-worker.js reciters.json android/app/src/main/assets/public/ || true
+          npx cap sync android || true
 
       - name: Build APK
         run: |
           cd android
+          ls -la
           chmod +x gradlew
           ./gradlew assembleDebug --stacktrace
 
