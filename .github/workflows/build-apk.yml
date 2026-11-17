@@ -35,14 +35,13 @@ jobs:
 
       - name: Init Capacitor App - FIXED
         run: |
-          rm -rf android
+          rm -rf android www
           rm -f capacitor.config.ts capacitor.config.json
-          npx cap init "Quran Studio" com.quranstudio.luganda --web-dir=.
+          mkdir -p www
+          cp index.html manifest.json service-worker.js reciters.json www/
+          npx cap init "Quran Studio" com.quranstudio.luganda --web-dir=www
           npx cap add android
-          ls -la android/
-          mkdir -p android/app/src/main/assets/public
-          cp index.html manifest.json service-worker.js reciters.json android/app/src/main/assets/public/ || true
-          npx cap sync android || true
+          npx cap sync android
 
       - name: Build APK
         run: |
