@@ -37,12 +37,9 @@ jobs:
         run: |
           rm -rf android
           rm -f capacitor.config.ts capacitor.config.json
-          npx cap init "Quran Studio" com.quranstudio.luganda --web-dir=. --npm-client=npm
+          npx cap init "Quran Studio" com.quranstudio.luganda --web-dir=.
           npx cap add android
-          echo "=== CHECK ANDROID FOLDER ==="
-          ls -la
           ls -la android/
-          ls -la android/app/ || true
           mkdir -p android/app/src/main/assets/public
           cp index.html manifest.json service-worker.js reciters.json android/app/src/main/assets/public/ || true
           npx cap sync android || true
@@ -50,7 +47,6 @@ jobs:
       - name: Build APK
         run: |
           cd android
-          ls -la
           chmod +x gradlew
           ./gradlew assembleDebug --stacktrace
 
